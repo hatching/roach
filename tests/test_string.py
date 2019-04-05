@@ -4,11 +4,18 @@
 
 from roach import (
     int8, uint8, int16, uint16, int32, uint32, int64, uint64, bigint,
-    asciiz, pad, unpad, ipv4, pack, unpack, hex, unhex, base64, uleb128
+    asciiz, pad, unpad, ipv4, pack, unpack, hex, unhex, base64, uleb128,
+    chunks, utf16z
 )
 
 def test_asciiz():
     assert asciiz("hello\x00world") == "hello"
+
+def test_chunks():
+    assert chunks("hello world", 3) == ["hel", "lo ", "wor", "ld"]
+
+def test_utf16z():
+    assert utf16z("h\x00e\x00l\x00l\x00o\x00\x00\x00world") == "h\x00e\x00l\x00l\x00o\x00"
 
 def test_hex():
     assert hex("hello") == "68656c6c6f"
