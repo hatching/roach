@@ -37,7 +37,7 @@ class PE(object):
             self.data = data
         else:
             self.data = data
-        self.pe = pefile.PE(data=self.data, fast_load=fast_load)
+        self.pe = pefile.PE(data=data, fast_load=fast_load)
 
     @property
     def dos_header(self):
