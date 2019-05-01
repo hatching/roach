@@ -90,6 +90,7 @@ def bigint(s, bitsize):
             s = s[:int(bitsize / 8)][::-1].encode("utf-8")
         except UnicodeDecodeError as e:
             print("Warning, a string can't be decoded as UTF-8 using bigint() function")
+            s = s[:int(bitsize / 8)][::-1]
     else:
         s = s[:int(bitsize / 8)][::-1]
 

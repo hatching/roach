@@ -2,6 +2,7 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from past.builtins import long
 from builtins import int
 import io
 
@@ -110,14 +111,12 @@ class RSA(object):
 
         obj = BlobTypes[header.bType]()
         obj.parse(buf)
-        print(obj)
         return obj.export_key()
 
     @staticmethod
     def export_key(n, e, d=None, p=None, q=None, crt=None):
-        wrap = lambda x: None if x is None else int(x)
+        wrap = lambda x: None if x is None else long(x)
         tup = wrap(n), wrap(e), wrap(d), wrap(p), wrap(q), wrap(crt)
-        print(tup)
         return RSA_.construct(tup).exportKey()
 
 RSA_ = RSAImplementation(use_fast_math=False)
