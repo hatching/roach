@@ -12,13 +12,19 @@ except ImportError as e:
     aplib = None
 
 def unpack(buf, length=None, maxsz=4*1024*1024):
+    """ Note : buf can be a str or a bytes-like object"""
+
+    # Use only bytes elements
+    if isinstance(buf, str):
+        buf = buf.encode("utf-8")
+
     if not aplib:
         raise RuntimeError("aplib can't be used on your platform!")
 
     if not length:
         length = len(buf) * 2
 
-    if buf.startswith("AP32"):
+    if buf.startswith(b"AP32"):
         fn = aplib.aPsafe_depack
     else:
         fn = aplib.aP_depack_asm_safe
@@ -33,3 +39,4 @@ def unpack(buf, length=None, maxsz=4*1024*1024):
         return
 
     return out.raw[:ret]
+

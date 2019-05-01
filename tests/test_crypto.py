@@ -5,38 +5,38 @@
 from roach import aes, blowfish, des3, rc4, rsa, xor, base64, unhex, rabbit
 
 def test_aes():
-    assert aes.ecb.decrypt("A"*16, "C"*32) == (
-        "I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
-        "I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
+    assert aes.ecb.decrypt(b"A"*16, b"C"*32) == (
+        b"I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
+        b"I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
     )
-    assert aes.ecb.decrypt("A"*16, data="C"*32) == (
-        "I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
-        "I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
+    assert aes.ecb.decrypt(b"A"*16, data=b"C"*32) == (
+        b"I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
+        b"I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
     )
 
-    assert aes.cbc.decrypt("A"*16, "B"*16, "C"*32) == (
-        "\x0b\xd4\x18\xa6\xf7\xbd\x1a\xff\x16\x1f\xd1A\xd4\xbe5\x9b"
-        "\n\xd5\x19\xa7\xf6\xbc\x1b\xfe\x17\x1e\xd0@\xd5\xbf4\x9a"
+    assert aes.cbc.decrypt(b"A"*16, b"B"*16, b"C"*32) == (
+        b"\x0b\xd4\x18\xa6\xf7\xbd\x1a\xff\x16\x1f\xd1A\xd4\xbe5\x9b"
+        b"\n\xd5\x19\xa7\xf6\xbc\x1b\xfe\x17\x1e\xd0@\xd5\xbf4\x9a"
     )
 
     assert aes.ctr(
-        "hello world12345", "A"*16,
-        "\x803\xe3J#\xf4;\x13\x11+h\xf5\xba-\x9b\x05"
-    ) == "B"*16
+        b"hello world12345", b"A"*16,
+        b"\x803\xe3J#\xf4;\x13\x11+h\xf5\xba-\x9b\x05"
+    ) == b"B"*16
 
     assert aes.import_key(
-        "\x08\x02\x00\x00\x0ef\x00\x00\x10\x00\x00\x00" + "A"*16
-    ) == ("AES-128", "A"*16)
+        b"\x08\x02\x00\x00\x0ef\x00\x00\x10\x00\x00\x00" + b"A"*16
+    ) == ("AES-128", b"A"*16)
 
 def test_blowfish():
     assert blowfish(
-        "blowfish", "\x91;\x92\xa9\x85\x83\xb36\xbb\xac\xa8r0\xf1$\x19"
-    ) == "_hello world01!?"
+        b"blowfish", b"\x91;\x92\xa9\x85\x83\xb36\xbb\xac\xa8r0\xf1$\x19"
+    ) == b"_hello world01!?"
 
 def test_des():
     assert des3.cbc.decrypt(
-        "A"*8, "B"*8, "\x1d\xed\xc37pV\x89S\xac\xaeT\xaf\xa1\xcfW\xa3"
-    ) == "C"*16
+        b"A"*8, b"B"*8, b"\x1d\xed\xc37pV\x89S\xac\xaeT\xaf\xa1\xcfW\xa3"
+    ) == b"C"*16
 
 def test_rc4():
     assert rc4.encrypt("Key", "Plaintext") == unhex("bbf316e8d940af0ad3")
@@ -48,18 +48,18 @@ def test_rc4():
 
 def test_xor():
     assert xor(
-        0xff, "\x97\x9a\x93\x93\x90\xdf\x88\x90\x8d\x93\x9b"
-    ) == "hello world"
+        0xff, b"\x97\x9a\x93\x93\x90\xdf\x88\x90\x8d\x93\x9b"
+    ) == b"hello world"
     assert xor(
-        "hi!", "\x00\x0cM\x04\x06\x01\x1f\x06S\x04\r"
-    ) == "hello world"
+        "hi!", b"\x00\x0cM\x04\x06\x01\x1f\x06S\x04\r"
+    ) == b"hello world"
 
 def test_rsa():
     assert rsa.import_key(base64("""
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5cagCPVB7LiX3UI5N3WRQJqTLe5RPrhFj79/U
 7AY+ziYQrKhSaIQG7KWuLAZj4sKRyRyZK1te0Ekb1UGkYn3b1YTQtXojaakq5p4WyHFvhfNPjSlJ
 ClIt4QC/NZ9uS2FRee8ONEKODrcgevzcd+lbNy/mGAB7yW9XgP06YzfOyQIDAQAB
-    """)) == """
+    """)) == b"""
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5cagCPVB7LiX3UI5N3WRQJqTL
 e5RPrhFj79/U7AY+ziYQrKhSaIQG7KWuLAZj4sKRyRyZK1te0Ekb1UGkYn3b1YTQ
@@ -80,7 +80,7 @@ nTMtXoo1r77CjBv5q+zvMSzeFUl+ji9beSZbzl9rAvJOBw4v1Bj8EzPq5aYvEs7h9M66BbZjuyeH
 zp2sRBuxE6K13j1AIVHCK7gbVwlieHWKuE5d45ealzSsChwoxGlJcHlHBI62zQqo7SHbb2An72IS
 XtyKY18/3bYV4nv6ydeC9zgpVlNfGwgwP05Rkp7ldJsCz7uT6RAANV86JIp+65SCKs4gcgWWPIbn
 KJ4s7fs/3oy7tUSTdviZShGj2cJGiEIyIiA=
-    """)) == """
+    """)) == b"""
 -----BEGIN RSA PRIVATE KEY-----
 MIICXAIBAAKBgQC/ulKFvvVCMzneYlY2dP42R/oYGCpgJL5yPOqJsriixueU3eWC
 qKJYcXf4J4LXZDvKXY//zU9SyJ7fAmI+ioV6IXmyjI7ax5gUFz65V7GfXaxSfMOU
@@ -102,7 +102,7 @@ LTOdWP2zfXQX3kNz3d2ZWAVY3H4zliMqbKgoepqsuC6ecZXDfa6gnpEgCdie1Iqi
 BgIAAACkAABSU0ExAAQAAAEAAQChEcfAbVoL/jUnFMxI+xsR0zZUvMZ+9pgkLGpaxTiLRP6PZqx8
 lDdwqdb7gC+m5aOz+Uwms6RHrY/xRMYEXopj877qLancMtsiqcpASOYJWxWSgW+gQMJGldwn2H97
 AaHoqFlbn7NW6oNtpz4C7NotiggtVnqLdE8YyNfO6/gEpQ==
-""")) == """
+""")) == b"""
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClBPjrztfIGE90i3pWLQiKLdrs
 Aj6nbYPqVrOfW1mo6KEBe3/YJ9yVRsJAoG+BkhVbCeZIQMqpItsy3Kkt6r7zY4pe
@@ -115,98 +115,98 @@ SMwUJzX+C1ptwMcRoQIDAQAB
 
     # This obviously doesn't make any sense, but it's to ensure that the
     # None or long wrapping is working, avoiding PyCrypto complains.
-    assert rsa.export_key(0x10001, 0x10001) == """
+    assert rsa.export_key(0x10001, 0x10001) == b"""
 -----BEGIN PUBLIC KEY-----
 MB4wDQYJKoZIhvcNAQEBBQADDQAwCgIDAQABAgMBAAE=
 -----END PUBLIC KEY-----
 """.strip()
 
 def test_rabbit():
-    key1 = "".join(chr(ch) for ch in (
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    ))
+    key1 = b"".join([
+        b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00",
+        b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00",
+    ])
 
-    key2 = "".join(chr(ch) for ch in (
-        0xAC, 0xC3, 0x51, 0xDC, 0xF1, 0x62, 0xFC, 0x3B,
-        0xFE, 0x36, 0x3D, 0x2E, 0x29, 0x13, 0x28, 0x91,
-    ))
+    key2 = b"".join([
+        b"\xAC", b"\xC3", b"\x51", b"\xDC", b"\xF1", b"\x62", b"\xFC", b"\x3B",
+        b"\xFE", b"\x36", b"\x3D", b"\x2E", b"\x29", b"\x13", b"\x28", b"\x91",
+    ])
 
-    key3 = "".join(chr(ch) for ch in (
-        0x43, 0x00, 0x9B, 0xC0, 0x01, 0xAB, 0xE9, 0xE9,
-        0x33, 0xC7, 0xE0, 0x87, 0x15, 0x74, 0x95, 0x83,
-    ))
+    key3 = b"".join([
+        b"\x43", b"\x00", b"\x9B", b"\xC0", b"\x01", b"\xAB", b"\xE9", b"\xE9",
+        b"\x33", b"\xC7", b"\xE0", b"\x87", b"\x15", b"\x74", b"\x95", b"\x83",
+    ])
 
-    iv1 = "".join(chr(ch) for ch in (
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    ))
+    iv1 = b"".join([
+        b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00", b"\x00"
+    ])
 
-    iv2 = "".join(chr(ch) for ch in (
-        0x59, 0x7E, 0x26, 0xC1, 0x75, 0xF5, 0x73, 0xC3,
-    ))
+    iv2 = b"".join([
+        b"\x59", b"\x7E", b"\x26", b"\xC1", b"\x75", b"\xF5", b"\x73", b"\xC3",
+    ])
 
-    iv3 = "".join(chr(ch) for ch in (
-        0x27, 0x17, 0xF4, 0xD2, 0x1A, 0x56, 0xEB, 0xA6,
-    ))
+    iv3 = b"".join([
+        b"\x27", b"\x17", b"\xF4", b"\xD2", b"\x1A", b"\x56", b"\xEB", b"\xA6",
+    ])
 
-    out1 = "".join(chr(ch) for ch in (
-        0x02, 0xF7, 0x4A, 0x1C, 0x26, 0x45, 0x6B, 0xF5,
-        0xEC, 0xD6, 0xA5, 0x36, 0xF0, 0x54, 0x57, 0xB1,
-        0xA7, 0x8A, 0xC6, 0x89, 0x47, 0x6C, 0x69, 0x7B,
-        0x39, 0x0C, 0x9C, 0xC5, 0x15, 0xD8, 0xE8, 0x88,
-        0x96, 0xD6, 0x73, 0x16, 0x88, 0xD1, 0x68, 0xDA,
-        0x51, 0xD4, 0x0C, 0x70, 0xC3, 0xA1, 0x16, 0xF4,
-    ))
+    out1 = b"".join([
+        b"\x02", b"\xF7", b"\x4A", b"\x1C", b"\x26", b"\x45", b"\x6B", b"\xF5",
+        b"\xEC", b"\xD6", b"\xA5", b"\x36", b"\xF0", b"\x54", b"\x57", b"\xB1",
+        b"\xA7", b"\x8A", b"\xC6", b"\x89", b"\x47", b"\x6C", b"\x69", b"\x7B",
+        b"\x39", b"\x0C", b"\x9C", b"\xC5", b"\x15", b"\xD8", b"\xE8", b"\x88",
+        b"\x96", b"\xD6", b"\x73", b"\x16", b"\x88", b"\xD1", b"\x68", b"\xDA",
+        b"\x51", b"\xD4", b"\x0C", b"\x70", b"\xC3", b"\xA1", b"\x16", b"\xF4",
+    ])
 
-    out2 = "".join(chr(ch) for ch in (
-        0x9C, 0x51, 0xE2, 0x87, 0x84, 0xC3, 0x7F, 0xE9,
-        0xA1, 0x27, 0xF6, 0x3E, 0xC8, 0xF3, 0x2D, 0x3D,
-        0x19, 0xFC, 0x54, 0x85, 0xAA, 0x53, 0xBF, 0x96,
-        0x88, 0x5B, 0x40, 0xF4, 0x61, 0xCD, 0x76, 0xF5,
-        0x5E, 0x4C, 0x4D, 0x20, 0x20, 0x3B, 0xE5, 0x8A,
-        0x50, 0x43, 0xDB, 0xFB, 0x73, 0x74, 0x54, 0xE5,
-    ))
+    out2 = b"".join([
+        b"\x9C", b"\x51", b"\xE2", b"\x87", b"\x84", b"\xC3", b"\x7F", b"\xE9",
+        b"\xA1", b"\x27", b"\xF6", b"\x3E", b"\xC8", b"\xF3", b"\x2D", b"\x3D",
+        b"\x19", b"\xFC", b"\x54", b"\x85", b"\xAA", b"\x53", b"\xBF", b"\x96",
+        b"\x88", b"\x5B", b"\x40", b"\xF4", b"\x61", b"\xCD", b"\x76", b"\xF5",
+        b"\x5E", b"\x4C", b"\x4D", b"\x20", b"\x20", b"\x3B", b"\xE5", b"\x8A",
+        b"\x50", b"\x43", b"\xDB", b"\xFB", b"\x73", b"\x74", b"\x54", b"\xE5",
+    ])
 
-    out3 = "".join(chr(ch) for ch in (
-        0x9B, 0x60, 0xD0, 0x02, 0xFD, 0x5C, 0xEB, 0x32,
-        0xAC, 0xCD, 0x41, 0xA0, 0xCD, 0x0D, 0xB1, 0x0C,
-        0xAD, 0x3E, 0xFF, 0x4C, 0x11, 0x92, 0x70, 0x7B,
-        0x5A, 0x01, 0x17, 0x0F, 0xCA, 0x9F, 0xFC, 0x95,
-        0x28, 0x74, 0x94, 0x3A, 0xAD, 0x47, 0x41, 0x92,
-        0x3F, 0x7F, 0xFC, 0x8B, 0xDE, 0xE5, 0x49, 0x96,
-    ))
+    out3 = b"".join([
+        b"\x9B", b"\x60", b"\xD0", b"\x02", b"\xFD", b"\x5C", b"\xEB", b"\x32",
+        b"\xAC", b"\xCD", b"\x41", b"\xA0", b"\xCD", b"\x0D", b"\xB1", b"\x0C",
+        b"\xAD", b"\x3E", b"\xFF", b"\x4C", b"\x11", b"\x92", b"\x70", b"\x7B",
+        b"\x5A", b"\x01", b"\x17", b"\x0F", b"\xCA", b"\x9F", b"\xFC", b"\x95",
+        b"\x28", b"\x74", b"\x94", b"\x3A", b"\xAD", b"\x47", b"\x41", b"\x92",
+        b"\x3F", b"\x7F", b"\xFC", b"\x8B", b"\xDE", b"\xE5", b"\x49", b"\x96",
+    ])
 
-    out4 = "".join(chr(ch) for ch in (
-        0xED, 0xB7, 0x05, 0x67, 0x37, 0x5D, 0xCD, 0x7C,
-        0xD8, 0x95, 0x54, 0xF8, 0x5E, 0x27, 0xA7, 0xC6,
-        0x8D, 0x4A, 0xDC, 0x70, 0x32, 0x29, 0x8F, 0x7B,
-        0xD4, 0xEF, 0xF5, 0x04, 0xAC, 0xA6, 0x29, 0x5F,
-        0x66, 0x8F, 0xBF, 0x47, 0x8A, 0xDB, 0x2B, 0xE5,
-        0x1E, 0x6C, 0xDE, 0x29, 0x2B, 0x82, 0xDE, 0x2A,
-    ))
+    out4 = b"".join([
+        b"\xED", b"\xB7", b"\x05", b"\x67", b"\x37", b"\x5D", b"\xCD", b"\x7C",
+        b"\xD8", b"\x95", b"\x54", b"\xF8", b"\x5E", b"\x27", b"\xA7", b"\xC6",
+        b"\x8D", b"\x4A", b"\xDC", b"\x70", b"\x32", b"\x29", b"\x8F", b"\x7B",
+        b"\xD4", b"\xEF", b"\xF5", b"\x04", b"\xAC", b"\xA6", b"\x29", b"\x5F",
+        b"\x66", b"\x8F", b"\xBF", b"\x47", b"\x8A", b"\xDB", b"\x2B", b"\xE5",
+        b"\x1E", b"\x6C", b"\xDE", b"\x29", b"\x2B", b"\x82", b"\xDE", b"\x2A",
+    ])
 
-    out5 = "".join(chr(ch) for ch in (
-        0x6D, 0x7D, 0x01, 0x22, 0x92, 0xCC, 0xDC, 0xE0,
-        0xE2, 0x12, 0x00, 0x58, 0xB9, 0x4E, 0xCD, 0x1F,
-        0x2E, 0x6F, 0x93, 0xED, 0xFF, 0x99, 0x24, 0x7B,
-        0x01, 0x25, 0x21, 0xD1, 0x10, 0x4E, 0x5F, 0xA7,
-        0xA7, 0x9B, 0x02, 0x12, 0xD0, 0xBD, 0x56, 0x23,
-        0x39, 0x38, 0xE7, 0x93, 0xC3, 0x12, 0xC1, 0xEB,
-    ))
+    out5 = b"".join([
+        b"\x6D", b"\x7D", b"\x01", b"\x22", b"\x92", b"\xCC", b"\xDC", b"\xE0",
+        b"\xE2", b"\x12", b"\x00", b"\x58", b"\xB9", b"\x4E", b"\xCD", b"\x1F",
+        b"\x2E", b"\x6F", b"\x93", b"\xED", b"\xFF", b"\x99", b"\x24", b"\x7B",
+        b"\x01", b"\x25", b"\x21", b"\xD1", b"\x10", b"\x4E", b"\x5F", b"\xA7",
+        b"\xA7", b"\x9B", b"\x02", b"\x12", b"\xD0", b"\xBD", b"\x56", b"\x23",
+        b"\x39", b"\x38", b"\xE7", b"\x93", b"\xC3", b"\x12", b"\xC1", b"\xEB",
+    ])
 
-    out6 = "".join(chr(ch) for ch in (
-        0x4D, 0x10, 0x51, 0xA1, 0x23, 0xAF, 0xB6, 0x70,
-        0xBF, 0x8D, 0x85, 0x05, 0xC8, 0xD8, 0x5A, 0x44,
-        0x03, 0x5B, 0xC3, 0xAC, 0xC6, 0x67, 0xAE, 0xAE,
-        0x5B, 0x2C, 0xF4, 0x47, 0x79, 0xF2, 0xC8, 0x96,
-        0xCB, 0x51, 0x15, 0xF0, 0x34, 0xF0, 0x3D, 0x31,
-        0x17, 0x1C, 0xA7, 0x5F, 0x89, 0xFC, 0xCB, 0x9F,
-    ))
+    out6 = b"".join([
+        b"\x4D", b"\x10", b"\x51", b"\xA1", b"\x23", b"\xAF", b"\xB6", b"\x70",
+        b"\xBF", b"\x8D", b"\x85", b"\x05", b"\xC8", b"\xD8", b"\x5A", b"\x44",
+        b"\x03", b"\x5B", b"\xC3", b"\xAC", b"\xC6", b"\x67", b"\xAE", b"\xAE",
+        b"\x5B", b"\x2C", b"\xF4", b"\x47", b"\x79", b"\xF2", b"\xC8", b"\x96",
+        b"\xCB", b"\x51", b"\x15", b"\xF0", b"\x34", b"\xF0", b"\x3D", b"\x31",
+        b"\x17", b"\x1C", b"\xA7", b"\x5F", b"\x89", b"\xFC", b"\xCB", b"\x9F",
+    ])
 
-    assert rabbit(key1, None, "\x00"*48) == out1
-    assert rabbit(key2, None, "\x00"*48) == out2
-    assert rabbit(key3, None, "\x00"*48) == out3
+    assert rabbit(key1, None, b"\x00"*48) == out1
+    assert rabbit(key2, None, b"\x00"*48) == out2
+    assert rabbit(key3, None, b"\x00"*48) == out3
 
-    assert rabbit(key1, iv1, "\x00"*48) == out4
-    assert rabbit(key1, iv2, "\x00"*48) == out5
-    assert rabbit(key1, iv3, "\x00"*48) == out6
+    assert rabbit(key1, iv1, b"\x00"*48) == out4
+    assert rabbit(key1, iv2, b"\x00"*48) == out5
+    assert rabbit(key1, iv3, b"\x00"*48) == out6

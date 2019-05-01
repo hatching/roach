@@ -5,21 +5,21 @@
 from roach import disasm
 
 class TestDisasm(object):
-    streams = "".join((
+    streams = b"".join((
         # mov esi, [edi+4]
-        "\x8b\x77\x04",
+        b"\x8b\x77\x04",
         # mov eax, [ebx+4*ecx+4242]
-        "\x8b\x84\x8b\x92\x10\x00\x00",
+        b"\x8b\x84\x8b\x92\x10\x00\x00",
         # mov al, byte [1333337]
-        "\xa0\x59\x58\x14\x00",
+        b"\xa0\x59\x58\x14\x00",
         # mov eax, byte [1333337]
-        "\xa1\x59\x58\x14\x00",
+        b"\xa1\x59\x58\x14\x00",
         # push 0x41414141
-        "\x68\x41\x41\x41\x41",
+        b"\x68\x41\x41\x41\x41",
         # call $+0
-        "\xe8\x00\x00\x00\x00",
+        b"\xe8\x00\x00\x00\x00",
         # movxz eax, byte [0x400000]
-        "\x0f\xb6\x05\x00\x00\x04\x00",
+        b"\x0f\xb6\x05\x00\x00\x04\x00",
     ))
 
     def setup(self):
@@ -31,7 +31,7 @@ class TestDisasm(object):
         assert insn1.op1 == "esi"
         assert insn1.op1 != "ebp"
         # One of the listed registers.
-        assert insn1.op1 == ("ebp", "esi")
+        assert insn1.op1 in ("ebp", "esi")
         assert insn1.op2 == ("dword", "edi", None, None, 4)
         assert str(insn1) == "mov esi, dword [edi+0x00000004]"
 
@@ -61,6 +61,6 @@ class TestDisasm(object):
         assert insn7.op2 == (None, None, None, 0x400000)
 
     def test_equal(self):
-        assert disasm("hAAAA", 0)[0].mnem == "push"
-        assert disasm("hAAAA", 0)[0].op1.value == 0x41414141
-        assert disasm("hAAAA", 0) == disasm("hAAAA", 0)
+        assert disasm(b"hAAAA", 0)[0].mnem == "push"
+        assert disasm(b"hAAAA", 0)[0].op1.value == 0x41414141
+        assert disasm(b"hAAAA", 0) == disasm(b"hAAAA", 0)

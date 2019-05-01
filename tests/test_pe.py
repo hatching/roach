@@ -26,20 +26,20 @@ AJYAAAAAAAAAAAAAAAAAAEAAAEAK
     assert img.dos_header.e_magic == 0x5a4d
     assert img.nt_headers.Signature == 0x4550
     assert img.file_header.NumberOfSections == len(img.sections)
-    assert img.sections[0].Name.strip("\x00") == ".text"
+    assert img.sections[0].Name.strip(b"\x00") == b".text"
     assert img.sections[-1].get_file_offset() == 0x298
     assert img.is32bit is True
     assert img.is64bit is False
-    assert img.section(".text").VirtualAddress == 0x1000
+    assert img.section(b".text").VirtualAddress == 0x1000
 
 def test_calc_exe():
     p = pe(open("tests/files/calc.exe", "rb").read(), fast_load=False)
     assert p.is32bit is True
-    data = p.resource("WEVT_TEMPLATE")
-    assert data.startswith("CRIM")
+    data = p.resource(b"WEVT_TEMPLATE")
+    assert data.startswith(b"CRIM")
     assert len(data) == 4750
 
-    icons = list(p.resources("RT_ICON"))
+    icons = list(p.resources(b"RT_ICON"))
     assert len(icons) == 16
     assert len(icons[0]) == 2664
     assert len(icons[7]) == 2216
@@ -52,8 +52,8 @@ def test_calc_exe():
 def test_ollydbg_exe():
     p = pe(open("tests/files/ollydbg.exe", "rb").read(), fast_load=False)
     assert p.is32bit is True
-    data = p.resource("DVCLAL")
-    assert data.startswith("\xA2\x8C\xDF\x98")
+    data = p.resource(b"DVCLAL")
+    assert data.startswith(b"\xA2\x8C\xDF\x98")
     assert len(data) == 16
 
 def test_pe2procmem():

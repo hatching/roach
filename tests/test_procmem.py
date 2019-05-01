@@ -42,7 +42,7 @@ def test_procmem_dummy_dmp():
 
     p = procmem("tests/files/dummy.dmp", False)
     assert len(p.regions) == 3
-    assert p.readv(0x41410f00, 0x200) == "A"*0xf4 + "X"*4 + "A"*8 + "B"*0x100
+    assert p.readv(0x41410f00, 0x200) == b"A"*0xf4 + b"X"*4 + b"A"*8 + b"B"*0x100
     assert p.uint8p(p.v2p(0x41410fff)) == 0x41
     assert p.uint8v(0x41410fff) == 0x41
     assert p.uint16p(p.v2p(0x4141100f)) == 0x4242
@@ -63,16 +63,16 @@ def test_calc_dmp():
     assert p.regions == procmempe("tests/files/calc.dmp", 0xd0000).regions
     assert p.findmz(0x129abc) == 0xd0000
     p = procmempe(p, 0xd0000)
-    assert p[0] == "M" and p[1] == "Z" and p[:2] == "MZ"
+    assert p[0] == b"M" and p[1] == b"Z" and p[:2] == b"MZ"
     # Old/regular method with PE header.
     assert pe(p.readv(p.imgbase, 0x1000)).dos_header.e_lfanew == 0xd8
-    assert p[0xd8:0xdc] == "PE\x00\x00"
+    assert p[0xd8:0xdc] == b"PE\x00\x00"
 
     assert pe(p).is32bit is True
     d = pe(p).optional_header.DATA_DIRECTORY[2]
     assert d.VirtualAddress == 0x59000 and d.Size == 0x62798
-    data = pe(p).resource("WEVT_TEMPLATE")
-    assert data.startswith("CRIM")
+    data = pe(p).resource(b"WEVT_TEMPLATE")
+    assert data.startswith(b"CRIM")
     assert len(data) == 4750
 
     # In this case imgbase + OptionalHeader.SizeOfImage adds up to 0x190000.
@@ -88,17 +88,17 @@ def test_calc_dmp():
 
 def test_methods():
     fd, filepath = tempfile.mkstemp()
-    os.write(fd, "".join((
+    os.write(fd, b"".join((
         struct.pack("QIIII", 0x401000, 0x1000, 0, 0, PAGE_READWRITE),
-        pad.null("foo\x00bar thisis0test\n hAAAA\xc3", 0x1000),
+        pad.null(b"foo\x00bar thisis0test\n hAAAA\xc3", 0x1000),
     )))
     os.close(fd)
     buf = procmem(filepath)
-    assert buf.readv(0x401000, 0x1000).endswith("\x00"*0x100)
-    assert list(buf.regexv("thisis(.*)test")) == [0x401008]
-    assert list(buf.regexv(" ")) == [0x401007, 0x401014]
-    assert list(buf.regexv(" ", 0x401000, 0x10)) == [0x401007]
-    assert list(buf.regexv("test..h")) == [0x40100f]
+    assert buf.readv(0x401000, 0x1000).endswith(b"\x00"*0x100)
+    assert list(buf.regexv(b"thisis(.*)test")) == [0x401008]
+    assert list(buf.regexv(b" ")) == [0x401007, 0x401014]
+    assert list(buf.regexv(b" ", 0x401000, 0x10)) == [0x401007]
+    assert list(buf.regexv(b"test..h")) == [0x40100f]
     assert buf.disasmv(0x401015, 6) == [
         insn("push", 0x41414141, addr=0x401015),
         insn("ret", addr=0x40101a),
@@ -108,4 +108,4 @@ def test_mmap():
     fd, filepath = tempfile.mkstemp()
     os.close(fd)
     assert procmem(filepath).regions == []
-    assert procmem(io.BytesIO("")).regions == []
+    assert procmem(io.BytesIO(b"")).regions == []

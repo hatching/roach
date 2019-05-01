@@ -2,6 +2,7 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from builtins import range
 import struct
 
 from roach.crypto.xor import xor
@@ -59,11 +60,11 @@ class Rabbit(object):
         s.carry = 0
 
         # Iterate system four times.
-        for i in xrange(4):
+        for i in range(4):
             self.next_state(self.ctx.m);
 
         # Modify the counters.
-        for i in xrange(8):
+        for i in range(8):
             self.ctx.m.c[i] ^= self.ctx.m.x[(i + 4) & 7]
 
         # Copy master instance to work instance.
@@ -84,14 +85,14 @@ class Rabbit(object):
         v[3] = ((v[2] << 16) | (v[0] & 0x0000ffff)) & 0xffffffff
 
         # Modify work's counter values.
-        for i in xrange(8):
+        for i in range(8):
             self.ctx.w.c[i] = self.ctx.m.c[i] ^ v[i & 3]
 
         # Copy state variables but not carry flag.
         self.ctx.w.x = self.ctx.m.x[:]
 
         # Iterate system four times.
-        for i in xrange(4):
+        for i in range(4):
             self.next_state(self.ctx.w);
 
     def next_state(self, state):
@@ -99,18 +100,18 @@ class Rabbit(object):
         x = [0x4D34D34D, 0xD34D34D3, 0x34D34D34]
 
         # Calculate new counter values.
-        for i in xrange(8):
+        for i in range(8):
             tmp = state.c[i]
             state.c[i] = (state.c[i] + x[i % 3] + state.carry) & 0xffffffff
             state.carry = (state.c[i] < tmp)
 
         # Calculate the g-values.
-        for i in xrange(8):
+        for i in range(8):
             g[i] = self.g_func(state.x[i] + state.c[i])
 
         # Calculate new state values.
         j = 7
-        for i in xrange(0, 8, 2):
+        for i in range(0, 8, 2):
             state.x[i + 0] = (
                 g[i + 0] + rotl(g[j], 16) + rotl(g[j - 1], 16)
             ) & 0xffffffff
@@ -122,7 +123,7 @@ class Rabbit(object):
 
     def encrypt(self, msg):
         x, ret = [0]*4, []
-        for off in xrange(0, len(msg) + 15, 16):
+        for off in range(0, len(msg) + 15, 16):
             self.next_state(self.ctx.w)
             x[0], x[1] = self.ctx.w.x[0], self.ctx.w.x[2]
             x[2], x[3] = self.ctx.w.x[4], self.ctx.w.x[6]
@@ -131,6 +132,6 @@ class Rabbit(object):
             x[2] ^= (self.ctx.w.x[1] >> 16) ^ (self.ctx.w.x[7] << 16) % 2**32
             x[3] ^= (self.ctx.w.x[3] >> 16) ^ (self.ctx.w.x[1] << 16) % 2**32
             ret.append(xor(struct.pack("IIII", *x), msg[off:off+16]))
-        return "".join(ret)
+        return b"".join(ret)
 
     decrypt = encrypt

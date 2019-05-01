@@ -3,6 +3,8 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from past.builtins import basestring
+from pefile import Structure
 import pefile
 import struct
 
@@ -29,9 +31,30 @@ class PE(object):
         if data.__class__ == ProcessMemoryPE:
             fast_load = False
             data.parent = self
+            # We need to convert the data ProcessMemoryPE object to avoid an error of "An integer is required" 
+            size = data.regions[-1].end-data.imgbase
+            self.data = data.readv(data.imgbase, size)
+        else:
+            self.data = data
+        self.pe = pefile.PE(data=self.data, fast_load=fast_load)
 
-        self.data = data
-        self.pe = pefile.PE(data=data, fast_load=fast_load)
+
+    def __unpack_data__(self, format, data, file_offset):
+        """Apply structure format to raw data.
+        Returns an unpacked structure object if successful, None otherwise.
+        """
+
+        structure = Structure(format, file_offset=file_offset)
+
+        try:
+            structure.__unpack__(data)
+        except PEFormatError as err:
+            self.__warnings.append(
+                'Corrupt header "{0}" at file offset {1}. Exception: {2}'.format(
+                    format[0], file_offset, err) )
+            return None
+
+        return structure
 
     @property
     def dos_header(self):
@@ -65,7 +88,7 @@ class PE(object):
 
     def section(self, name):
         for section in self.pe.sections:
-            if section.Name.rstrip("\x00") == name:
+            if section.Name.rstrip(b"\x00") == name:
                 return section
 
     def resources(self, name):
@@ -74,9 +97,9 @@ class PE(object):
         type_int = lambda e1, e2, e3: e1.id == type_id
 
         if isinstance(name, basestring):
-            if name.startswith("RT_"):
+            if name.startswith(b"RT_"):
                 compare = type_int
-                type_id = pefile.RESOURCE_TYPE[name]
+                type_id = pefile.RESOURCE_TYPE[name.decode("utf-8")]
             else:
                 compare = name_str
         else:
@@ -113,4 +136,4 @@ def pe2procmem(data):
             section.SizeOfRawData, 0, 0, 0
         ))
         ret.append(section.get_data())
-    return "".join(ret)
+    return b"".join(ret)
