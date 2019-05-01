@@ -24,7 +24,7 @@ setup(
     install_requires=[
         "click==7.0",
         "cryptography>=2.1",
-        "pefile==v2019.4.18",
+        "pefile==v2016.3.28",
         "pycrypto",
     ],
     extras_require={

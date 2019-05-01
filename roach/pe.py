@@ -30,13 +30,8 @@ class PE(object):
         if data.__class__ == ProcessMemoryPE:
             fast_load = False
             data.parent = self
-            # TO BE REMOVED, it was a test for Python3 support but it doesn't work, I keep this in case it's useful
-            # We need to convert the data ProcessMemoryPE object to avoid an error of "An integer is required" 
-            #size = data.regions[-1].end-data.imgbase
-            #self.data = data.readv(data.imgbase, size)
-            self.data = data
-        else:
-            self.data = data
+        
+        self.data = data
         self.pe = pefile.PE(data=data, fast_load=fast_load)
 
     @property
