@@ -16,7 +16,10 @@ def unpack(buf, length=None, maxsz=4*1024*1024):
 
     # Use only bytes elements
     if isinstance(buf, str):
-        buf = buf.encode("utf-8")
+        try:
+            buf = buf.encode("utf-8")
+        except UnicodeDecodeError as e:
+            print("Warning, %s can't be decoded as utf-8" % buf)
 
     if not aplib:
         raise RuntimeError("aplib can't be used on your platform!")

@@ -81,7 +81,10 @@ class Structure(object):
     def from_buffer_copy(cls, buf):
         obj = cls()
         if isinstance(buf, str):
-            buf = buf.encode("utf-8")
+            try:
+                buf = buf.encode("utf-8")
+            except UnicodeDecodeError as e:
+                print("Warning, a string can't be decoded as UTF-8 using bigint() function")
         obj._values_ = obj.Klass.from_buffer_copy(buf)
         return obj
 

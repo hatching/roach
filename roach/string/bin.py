@@ -19,7 +19,11 @@ class IntWorker(object):
             return struct.pack(self.fmt, value)
 
         if isinstance(value, str):
-            value = value.encode("utf-8")
+            try:
+                value = value.encode("utf-8")
+            except UnicodeDecodeError as e:
+                print("Warning, a string can't be decoded as UTF-8 using IntWorker object")
+
 
         count = int(len(value) / self.size)
         # TODO Should we return something else?
@@ -82,7 +86,10 @@ def bigint(s, bitsize):
         return
 
     if isinstance(s, str):
-        s = s[:int(bitsize / 8)][::-1].encode("utf-8")
+        try:
+            s = s[:int(bitsize / 8)][::-1].encode("utf-8")
+        except UnicodeDecodeError as e:
+            print("Warning, a string can't be decoded as UTF-8 using bigint() function")
     else:
         s = s[:int(bitsize / 8)][::-1]
 

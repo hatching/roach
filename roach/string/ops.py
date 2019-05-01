@@ -18,7 +18,10 @@ def unhex(s):
 def uleb128(s):
     ret = 0
     for idx in range(len(s)):
-        ret += (s[idx] & 0x7f) << (idx*7)
+        if isinstance(s[idx], str):
+            ret += (ord(s[idx]) & 0x7f) << (idx*7)
+        else:
+            ret += (s[idx] & 0x7f) << (idx*7)
         if s[idx] < 0x80:
             break
     return idx+1, ret
@@ -58,7 +61,10 @@ class Unpadding(object):
         self.style = style
 
     def unpad(self, s):
-        count = s[-1] if s else 0
+        if isinstance(s, str):
+            count = ord(s[-1]) if s else 0
+        else:
+            count = s[-1] if s else 0
         if self.style == "pkcs7" and s[-count:] == b"\x03" * count:
             return s[:-count]
         return s
