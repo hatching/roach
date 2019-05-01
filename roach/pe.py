@@ -4,7 +4,6 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 from past.builtins import basestring
-from pefile import Structure
 import pefile
 import struct
 
@@ -39,24 +38,6 @@ class PE(object):
         else:
             self.data = data
         self.pe = pefile.PE(data=self.data, fast_load=fast_load)
-
-
-    def __unpack_data__(self, format, data, file_offset):
-        """Apply structure format to raw data.
-        Returns an unpacked structure object if successful, None otherwise.
-        """
-
-        structure = Structure(format, file_offset=file_offset)
-
-        try:
-            structure.__unpack__(data)
-        except PEFormatError as err:
-            self.__warnings.append(
-                'Corrupt header "{0}" at file offset {1}. Exception: {2}'.format(
-                    format[0], file_offset, err) )
-            return None
-
-        return structure
 
     @property
     def dos_header(self):
