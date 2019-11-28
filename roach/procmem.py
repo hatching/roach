@@ -2,6 +2,7 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from builtins import int
 import mmap
 import os
 import re
@@ -55,12 +56,12 @@ class Region(object):
             "offset": self.offset,
         }
 
-    def __cmp__(self, other):
+    def __eq__(self, other):
         if not isinstance(other, Region):
             raise RuntimeError("not a region object!")
 
         # TODO Include the offset in this comparison?
-        return not (
+        return (
             self.addr == other.addr and self.size == other.size and
             self.state == other.state and self.type_ == other.type_ and
             self.protect == other.protect
@@ -157,7 +158,7 @@ class ProcessMemory(object):
             l = min(a + l - addr, length)
             ret.append(self.read(self.v2p(addr), l))
             addr, length = addr + l, length - l
-        return "".join(ret)
+        return b"".join(ret)
 
     def read_until(self, addr, s=None):
         """Reads a continuous buffer with address until the stop marker."""
@@ -174,7 +175,7 @@ class ProcessMemory(object):
                 break
             ret.append(buf)
             addr = addr + l
-        return "".join(ret)
+        return b"".join(ret)
 
     def uint8p(self, offset):
         """Read unsigned 8-bit value at offset."""
@@ -245,7 +246,7 @@ class ProcessMemory(object):
             buf = self.readv(addr, 2)
             if not buf:
                 return
-            if buf == "MZ":
+            if buf == b"MZ":
                 return addr
             addr -= 0x10000
 
@@ -320,7 +321,7 @@ class ProcessMemoryPE(ProcessMemory):
         return r.addr + r.size
 
     def __getitem__(self, item):
-        if isinstance(item, (int, long)):
+        if isinstance(item, int):
             return self.readv(self.imgbase + item, 1)
 
         if item.start is None:

@@ -2,11 +2,12 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from builtins import range
 import base64
 import binascii
 
 def asciiz(s):
-    return s.split("\x00")[0]
+    return s.split(b"\x00")[0]
 
 def hex(s):
     return binascii.hexlify(s)
@@ -16,9 +17,12 @@ def unhex(s):
 
 def uleb128(s):
     ret = 0
-    for idx in xrange(len(s)):
-        ret += (ord(s[idx]) & 0x7f) << (idx*7)
-        if ord(s[idx]) < 0x80:
+    for idx in range(len(s)):
+        if isinstance(s[idx], str):
+            ret += (ord(s[idx]) & 0x7f) << (idx*7)
+        else:
+            ret += (s[idx] & 0x7f) << (idx*7)
+        if s[idx] < 0x80:
             break
     return idx+1, ret
 
@@ -41,12 +45,13 @@ class Padding(object):
 
     def pad(self, s, block_size):
         length = block_size - len(s) % block_size
+        padding = None
         if length == block_size:
-            padding = ""
+            padding = b""
         elif self.style == "pkcs7":
-            padding = "%c" % length * length
+            padding = b"%c" % length * length
         elif self.style == "null":
-            padding = "\x00" * length
+            padding = b"\x00" * length
         return s + padding
 
     __call__ = pkcs7 = pad
@@ -56,8 +61,11 @@ class Unpadding(object):
         self.style = style
 
     def unpad(self, s):
-        count = ord(s[-1]) if s else 0
-        if self.style == "pkcs7" and s[-count:] == s[-1] * count:
+        if isinstance(s, str):
+            count = ord(s[-1]) if s else 0
+        else:
+            count = s[-1] if s else 0
+        if self.style == "pkcs7" and s[-count:] == b"\x03" * count:
             return s[:-count]
         return s
 

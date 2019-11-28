@@ -2,6 +2,7 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from builtins import int
 import ctypes
 
 from roach.string.bin import (
@@ -32,7 +33,7 @@ class Structure(object):
                     type_ = mapping[type_.__class__] * type_.mul
                 else:
                     type_ = mapping[type_.__class__]
-            elif isinstance(type_, (int, long)):
+            elif isinstance(type_, (int, int)):
                 type_ = ctypes.c_char * type_
             elif issubclass(type_, Structure):
                 # Keep track, likely for Python GC purposes.
@@ -79,6 +80,11 @@ class Structure(object):
     @classmethod
     def from_buffer_copy(cls, buf):
         obj = cls()
+        if isinstance(buf, str):
+            try:
+                buf = buf.encode("utf-8")
+            except UnicodeDecodeError as e:
+                print("Warning, a string can't be decoded as UTF-8 using bigint() function")
         obj._values_ = obj.Klass.from_buffer_copy(buf)
         return obj
 

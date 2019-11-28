@@ -3,6 +3,7 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from past.builtins import basestring
 import pefile
 import struct
 
@@ -29,7 +30,7 @@ class PE(object):
         if data.__class__ == ProcessMemoryPE:
             fast_load = False
             data.parent = self
-
+        
         self.data = data
         self.pe = pefile.PE(data=data, fast_load=fast_load)
 
@@ -65,7 +66,7 @@ class PE(object):
 
     def section(self, name):
         for section in self.pe.sections:
-            if section.Name.rstrip("\x00") == name:
+            if section.Name.rstrip(b"\x00") == name:
                 return section
 
     def resources(self, name):
@@ -74,9 +75,9 @@ class PE(object):
         type_int = lambda e1, e2, e3: e1.id == type_id
 
         if isinstance(name, basestring):
-            if name.startswith("RT_"):
+            if name.startswith(b"RT_"):
                 compare = type_int
-                type_id = pefile.RESOURCE_TYPE[name]
+                type_id = pefile.RESOURCE_TYPE[name.decode("utf-8")]
             else:
                 compare = name_str
         else:
@@ -113,4 +114,4 @@ def pe2procmem(data):
             section.SizeOfRawData, 0, 0, 0
         ))
         ret.append(section.get_data())
-    return "".join(ret)
+    return b"".join(ret)

@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="roach",
-    version="0.1.2",
+    version="0.2",
     author="Jurriaan Bremer",
     author_email="jbr@cuckoo.sh",
     packages=[
@@ -22,9 +22,9 @@ setup(
     description="Cockroach is your primitive & immortal swiss army knife",
     include_package_data=True,
     install_requires=[
-        "click==6.6",
+        "click==7.0",
         "cryptography>=2.1",
-        "pefile2==1.2.11",
+        "pefile==v2016.3.28",
         "pycrypto",
     ],
     extras_require={
@@ -32,10 +32,16 @@ setup(
             "capstone-windows==3.0.4",
         ],
         ":sys_platform == 'darwin'": [
-            "capstone==3.0.5rc2",
+            "capstone==3.0.5",
         ],
         ":sys_platform == 'linux2'": [
-            "capstone==3.0.5rc2",
+            "capstone==3.0.5",
         ],
+        "dev": [
+            "pytest==4.4.1",
+            "mock==2.0.0",
+            "capstone==3.0.5",
+        ]
+
     },
 )

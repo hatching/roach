@@ -2,6 +2,8 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from past.builtins import long
+from builtins import int
 import io
 
 from Crypto.PublicKey.RSA import RSAImplementation
@@ -10,7 +12,7 @@ from roach.crypto.winhdr import BLOBHEADER, BaseBlob
 from roach.string.bin import uint32, bigint
 
 class PublicKeyBlob(BaseBlob):
-    magic = "RSA1"
+    magic = b"RSA1"
 
     def __init__(self):
         BaseBlob.__init__(self)
@@ -23,20 +25,20 @@ class PublicKeyBlob(BaseBlob):
             return
 
         self.bitsize = uint32(header[4:8])
-        self.e = long(uint32(header[8:12]))
+        self.e = int(uint32(header[8:12]))
 
-        n = buf.read(self.bitsize / 8)
-        if len(n) != self.bitsize / 8:
+        n = buf.read(int(self.bitsize / 8))
+        if len(n) != int(self.bitsize / 8):
             return
 
         self.n = bigint(n, self.bitsize)
-        return 12 + self.bitsize / 8
+        return 12 + int(self.bitsize / 8)
 
     def export_key(self):
         return RSA.export_key(self.n, self.e)
 
 class PrivateKeyBlob(PublicKeyBlob):
-    magic = "RSA2"
+    magic = b"RSA2"
 
     def __init__(self):
         PublicKeyBlob.__init__(self)
@@ -52,27 +54,27 @@ class PrivateKeyBlob(PublicKeyBlob):
         if not off:
             return
 
-        self.p1 = bigint(buf.read(self.bitsize / 16), self.bitsize / 2)
+        self.p1 = bigint(buf.read(int(self.bitsize / 16)), int(self.bitsize / 2))
         if self.p1 is None:
             return
 
-        self.p2 = bigint(buf.read(self.bitsize / 16), self.bitsize / 2)
+        self.p2 = bigint(buf.read(int(self.bitsize / 16)), int(self.bitsize / 2))
         if self.p2 is None:
             return
 
-        self.exp1 = bigint(buf.read(self.bitsize / 16), self.bitsize / 2)
+        self.exp1 = bigint(buf.read(int(self.bitsize / 16)), int(self.bitsize / 2))
         if self.exp1 is None:
             return
 
-        self.exp2 = bigint(buf.read(self.bitsize / 16), self.bitsize / 2)
+        self.exp2 = bigint(buf.read(int(self.bitsize / 16)), int(self.bitsize / 2))
         if self.exp2 is None:
             return
 
-        self.coeff = bigint(buf.read(self.bitsize / 16), self.bitsize / 2)
+        self.coeff = bigint(buf.read(int(self.bitsize / 16)), int(self.bitsize / 2))
         if self.coeff is None:
             return
 
-        self.d = bigint(buf.read(self.bitsize / 8), self.bitsize)
+        self.d = bigint(buf.read(int(self.bitsize / 8)), self.bitsize)
         if self.d is None:
             return
 
