@@ -3,7 +3,6 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from past.builtins import basestring
 import pefile
 import struct
 
@@ -74,7 +73,7 @@ class PE(object):
         name_int = lambda e1, e2, e3: e2.struct.Name == name
         type_int = lambda e1, e2, e3: e1.id == type_id
 
-        if isinstance(name, basestring):
+        if isinstance(name, bytes):
             if name.startswith(b"RT_"):
                 compare = type_int
                 type_id = pefile.RESOURCE_TYPE[name.decode("utf-8")]
