@@ -28,6 +28,18 @@ def test_aes():
         b"\x08\x02\x00\x00\x0ef\x00\x00\x10\x00\x00\x00" + b"A"*16
     ) == ("AES-128", b"A"*16)
 
+    assert aes.import_key(
+        b"\x08\x02\x00\x00\x0ef"
+    ) is None
+
+    assert aes.import_key(
+        b't\xfb\x88\xcf' + b"A"*16
+    ) is None
+
+    assert aes.import_key(
+        b'\x08\x02\x00\x00\x0ef' + b"A" * 16
+    ) is None
+
 def test_blowfish():
     assert blowfish(
         b"blowfish", b"\x91;\x92\xa9\x85\x83\xb36\xbb\xac\xa8r0\xf1$\x19"
@@ -110,6 +122,12 @@ BMZE8Y+tR6SzJkz5s6Plpi+A+9apcDeUfKxmj/5EizjFWmosJJj2fsa8VDbTERv7
 SMwUJzX+C1ptwMcRoQIDAQAB
 -----END PUBLIC KEY-----
 """.strip()
+
+    assert rsa.import_key(base64("""
+bgIAAACkAABSU0ExAAQAAAEAAQChEcfAbVoL/jUnFMxI+xsR0zZUvMZ+9pgkLGpaxTiLRP6PZqx8
+lDdwqdb7gC+m5aOz+Uwms6RHrY/xRMYEXopj877qLancMtsiqcpASOYJWxWSgW+gQMJGldwn2H97
+AaHoqFlbn7NW6oNtpz4C7NotiggtVnqLdE8YyNfO6/gEpQ1==
+""")) is None
 
     assert rsa.import_key("") is None
 

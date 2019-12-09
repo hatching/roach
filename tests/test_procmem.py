@@ -6,8 +6,17 @@ import io
 import os
 import struct
 import tempfile
+import pytest
+from roach.procmem import Region, ProcessMemory
 
 from roach import procmem, procmempe, pad, pe, insn, PAGE_READWRITE
+
+def test_procmem_region():
+    r = Region(1,2,3,4,5,6)
+    assert r == Region(1,2,3,4,5,6)
+    assert r == Region(1, 2, 3, 4, 5, None)
+    with pytest.raises(RuntimeError):
+        assert r == "test"
 
 def test_procmem_dummy_dmp():
     p = procmem("tests/files/dummy.dmp")

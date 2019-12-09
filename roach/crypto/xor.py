@@ -6,7 +6,7 @@ from builtins import int, bytes
 from Crypto.Cipher import XOR
 
 def xor(key, data):
-    if not isinstance(data, str):
+    if not isinstance(data, bytes):
         raise RuntimeError("data value must be a string!")
 
     # Retro compatiblity with Python2 (key is used as it is)

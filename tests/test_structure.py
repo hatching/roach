@@ -124,6 +124,8 @@ def test_int_wrappers():
     assert a.g == -1
     assert a.h == 0xffffffffffffffff
 
+    a = I1.from_buffer_copy(b"\231fs" * 32)
+
     class I2(Structure):
         _fields_ = [
             ("i1", I1),
