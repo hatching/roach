@@ -3,6 +3,36 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 from roach import disasm
+from roach.disasm import Operand, Instruction
+from unittest.mock import Mock, patch, PropertyMock, MagicMock
+
+def test_instruction():
+    assert (Instruction() == 3) is False
+    assert (Instruction(mnem=2) == Instruction(mnem=3)) is False
+    assert (Instruction(addr=2, op1=1, op2=2, op3=3) == Instruction(addr=2, op1=1, op2=2, op3=4)) is False
+    # @todo check if str method is implemented right
+    assert str(Instruction(mnem=0, op1=1, op2=2, op3=3)) == "0 1, 2, 3"
+    assert str(Instruction(mnem="21")) == "21"
+
+def test_disamsm_mem():
+    with patch.object(Operand, 'is_mem') as t:
+        t.__get__ = Mock(return_value=True)
+        p = PropertyMock()
+        m = Mock()
+        m.value.mem.disp = p
+
+        obj = Operand(m)
+        assert obj.value is p
+
+def test_disamsm_reg():
+    with patch.object(Operand, 'is_reg') as t:
+        t.__get__ = Mock(return_value=True)
+        m = Mock()
+        m.reg = 1
+
+        obj = Operand(m)
+        obj.regs = {1: "89"}
+        assert obj.value == "89"
 
 class TestDisasm(object):
     streams = b"".join((

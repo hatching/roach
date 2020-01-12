@@ -1,10 +1,42 @@
-# Copyright (C) 2018 Jurriaan Bremer.
+# Copyright (C) 2020 Hatching International B.V..
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import pytest
+import unittest
+import os
+import roach.native.aplib
 
+from pathlib import Path
 from roach import aplib, gzip, base64
+from unittest.mock import patch
+from roach.native.common import load_library
+
+@patch("os.path.exists", return_value=False)
+def test_common_not_exists(r):
+    with pytest.raises(ImportError):
+        load_library("test")
+
+@patch("sys.platform", return_value="win32")
+@patch("os.path.exists", return_value=True)
+@patch("roach.native.common.ctypes.LibraryLoader.LoadLibrary")
+def test_common(a, f, r):
+    load_library("test")
+    p = Path(os.path.dirname(__file__)).parents[0]
+    o = os.path.join(p, "roach", "native", "components", "test-64.so")
+    a.assert_called_once_with(o)
+
+class TestMeme(unittest.TestCase):
+    def setUp(self):
+        self.aplib = roach.native.aplib.aplib
+        roach.native.aplib.aplib = None
+
+    def test_import(self):
+        with pytest.raises(RuntimeError):
+            roach.native.aplib.unpack(b"t")
+
+    def tearDown(self):
+        roach.native.aplib.aplib = self.aplib
 
 @pytest.mark.skipif("sys.platform == 'darwin'")
 def test_aplib():

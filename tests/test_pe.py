@@ -4,8 +4,23 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import io
+import pytest
 
 from roach import pe, base64, pe2procmem, procmem
+from roach.pe import PE
+from unittest.mock import patch
+from roach.procmem import ProcessMemoryPE, ProcessMemory
+
+def test_pe():
+    d = ProcessMemory(open(__file__), load=False)
+    with pytest.raises(RuntimeError):
+        PE(d)
+
+@patch("pefile.PE")
+def test_pe2(p):
+    a = PE("test")
+    a.resources = lambda a: iter(list(range(0)))
+    a.resource("test")
 
 def test_pe_header():
     img = pe(base64("""

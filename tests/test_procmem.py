@@ -7,9 +7,19 @@ import os
 import struct
 import tempfile
 import pytest
-from roach.procmem import Region, ProcessMemory
+from roach.procmem import Region, ProcessMemory, ProcessMemoryPE
 
 from roach import procmem, procmempe, pad, pe, insn, PAGE_READWRITE
+
+def test_pprocmem():
+    pm = ProcessMemory(open(__file__), load=False)
+    pm._regions = [1,2]
+    p = ProcessMemoryPE(pm, imgbase="1", load=False)
+    with pytest.raises(RuntimeError):
+        ProcessMemoryPE(p, imgbase="1")
+
+    with pytest.raises(RuntimeError):
+        ProcessMemoryPE(p="test", imgbase=None)
 
 def test_procmem_region():
     r = Region(1,2,3,4,5,6)

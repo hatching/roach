@@ -2,9 +2,18 @@
 # This file is part of Roach - https://github.com/jbremer/roach.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import pytest
+
 from roach import aes, blowfish, des3, rc4, rsa, xor, base64, unhex, rabbit
+from roach.crypto.aes import PlaintextKeyBlob
+from roach.crypto.rsa import PublicKeyBlob, PrivateKeyBlob
+from unittest.mock import Mock, patch
 
 def test_aes():
+    mock = Mock()
+    mock.read.return_value = "test"
+    assert PlaintextKeyBlob().parse(mock) is None
+
     assert aes.ecb.decrypt(b"A"*16, b"C"*32) == (
         b"I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
         b"I\x96Z\xe4\xb5\xffX\xbdT]\x93\x03\x96\xfcw\xd9"
@@ -65,8 +74,105 @@ def test_xor():
     assert xor(
         "hi!", b"\x00\x0cM\x04\x06\x01\x1f\x06S\x04\r"
     ) == b"hello world"
+    with pytest.raises(RuntimeError):
+        assert xor(
+            "hi!", "test"
+        ) == b"hello world"
+
+@patch("roach.crypto.rsa.PublicKeyBlob")
+@patch("roach.crypto.rsa.bigint", side_effect=lambda a, b: None)
+def test_rsa_p1(big, pk):
+    pk.parse.return_value = 3
+    mock = Mock()
+    mock.read.return_value = b"test"
+    p = PrivateKeyBlob()
+    p.bitsize = 16
+    assert p.parse(mock) == "a"
+    assert len(big.mock_calls) == 1
+
+@patch("roach.crypto.rsa.PublicKeyBlob")
+@patch("roach.crypto.rsa.bigint", side_effect=[3, None])
+def test_rsa_p2(big, pk):
+    pk.parse.return_value = 3
+    mock = Mock()
+    mock.read.return_value = b"test"
+    p = PrivateKeyBlob()
+    p.bitsize = 16
+    assert p.parse(mock) == "b"
+    assert len(big.mock_calls) == 2
+
+@patch("roach.crypto.rsa.PublicKeyBlob")
+@patch("roach.crypto.rsa.bigint", side_effect=[3, 3, None])
+def test_rsa_p3(big, pk):
+    pk.parse.return_value = 3
+    mock = Mock()
+    mock.read.return_value = b"test"
+    p = PrivateKeyBlob()
+    p.bitsize = 16
+    assert p.parse(mock) == "c"
+    assert len(big.mock_calls) == 3
+
+@patch("roach.crypto.rsa.PublicKeyBlob")
+@patch("roach.crypto.rsa.bigint", side_effect=[3, 3, 3, None])
+def test_rsa_p4(big, pk):
+    pk.parse.return_value = 3
+    mock = Mock()
+    mock.read.return_value = b"test"
+    p = PrivateKeyBlob()
+    p.bitsize = 16
+    assert p.parse(mock) == "d"
+    assert len(big.mock_calls) == 4
+
+@patch("roach.crypto.rsa.PublicKeyBlob")
+@patch("roach.crypto.rsa.bigint", side_effect=[3, 3, 3, 3, None])
+def test_rsa_p5(big, pk):
+    pk.parse.return_value = 3
+    mock = Mock()
+    mock.read.return_value = b"test"
+    p = PrivateKeyBlob()
+    p.bitsize = 16
+    assert p.parse(mock) == "e"
+    assert len(big.mock_calls) == 5
+
+@patch("roach.crypto.rsa.PublicKeyBlob")
+@patch("roach.crypto.rsa.bigint", side_effect=[3, 3, 3, 3, 3, None])
+def test_rsa_p6(big, pk):
+    pk.parse.return_value = 3
+    mock = Mock()
+    mock.read.return_value = b"test"
+    p = PrivateKeyBlob()
+    p.bitsize = 16
+    assert p.parse(mock) == "f"
+    assert len(big.mock_calls) == 6
+
+@patch("roach.crypto.rsa.RSA.export_key")
+def test_rsa_export(exp):
+    p = PrivateKeyBlob()
+    p.n = 1
+    p.e = 8
+    p.d = 12
+    p.export_key()
+    exp.assert_called_once_with(1, 8, 12)
+
+@patch("roach.crypto.rsa.RSA")
+def test_rsa_import(rsaa):
+
+    rsaa.algorithms = {}
+    assert rsa.import_key(base64("""
+    BgIAAACkAABSU0ExAAQAAAEAAQChEcfAbVoL/jUnFMxI+xsR0zZUvMZ+9pgkLGpaxTiLRP6PZqx8
+    lDdwqdb7gC+m5aOz+Uwms6RHrY/xRMYEXopj877qLancMtsiqcpASOYJWxWSgW+gQMJGldwn2H97
+    AaHoqFlbn7NW6oNtpz4C7NotiggtVnqLdE8YyNfO6/gEpQ==
+    """)) == "b"
 
 def test_rsa():
+    mock = Mock()
+    mock.read.return_value = b"test"
+    assert PublicKeyBlob().parse(mock) is None
+
+    mock.read.return_value = b"RSA1" + b"a" * 8
+    assert PublicKeyBlob().parse(mock) is None
+    assert PrivateKeyBlob().parse(mock) is None
+
     assert rsa.import_key(base64("""
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5cagCPVB7LiX3UI5N3WRQJqTLe5RPrhFj79/U
 7AY+ziYQrKhSaIQG7KWuLAZj4sKRyRyZK1te0Ekb1UGkYn3b1YTQtXojaakq5p4WyHFvhfNPjSlJ
@@ -78,36 +184,6 @@ e5RPrhFj79/U7AY+ziYQrKhSaIQG7KWuLAZj4sKRyRyZK1te0Ekb1UGkYn3b1YTQ
 tXojaakq5p4WyHFvhfNPjSlJClIt4QC/NZ9uS2FRee8ONEKODrcgevzcd+lbNy/m
 GAB7yW9XgP06YzfOyQIDAQAB
 -----END PUBLIC KEY-----
-""".strip()
-
-    assert rsa.import_key(base64("""
-BwIAAACkAABSU0EyAAQAAAEAAQCxTx++ykWtb2UaYFYQLt1yM893SV/wLehU2DwzeAMpxq5MsOF5
-XVAd1qSElMN8Uqxdn7FXuT4XFJjH2o6MsnkheoWKPmIC357IUk/N/49dyjtk14In+HdxWKKoguXd
-lOfGoriyieo8cr4kYCoYGPpHNv50NlZi3jkzQvW+hVK6v/ufshtYBRd/+NjecYVQlt7ivap8d/9g
-szM+eSC91zZm8OPUCmfQX8AJOq9r7LUB/tS5DLswtJZdDDmpjhbGf/ZDg+YhHFPYvRlnGP4PlXBW
-Qds44ZlSJJ780+tDuxP3Zn1Nfch4IZjkATGx7Zd9tzr8iLDe0zAGzJDaV92qHR7Hn5V5VGH1dZk2
-DMiR1893vJfuE9RwDja6hUycXNjj9Y1fCYGK3rsVGO7+Dg9xab3HFqueydlMgir8MD4jShsaXk2P
-jUYp2KdJuyN6BZP1oorUntgJIJGeoK59w5Vxni64rJp6KKhsKiOWM37cWAVYmd3dc0PeF3R9s/1Y
-nTMtXoo1r77CjBv5q+zvMSzeFUl+ji9beSZbzl9rAvJOBw4v1Bj8EzPq5aYvEs7h9M66BbZjuyeH
-zp2sRBuxE6K13j1AIVHCK7gbVwlieHWKuE5d45ealzSsChwoxGlJcHlHBI62zQqo7SHbb2An72IS
-XtyKY18/3bYV4nv6ydeC9zgpVlNfGwgwP05Rkp7ldJsCz7uT6RAANV86JIp+65SCKs4gcgWWPIbn
-KJ4s7fs/3oy7tUSTdviZShGj2cJGiEIyIiA=
-    """)) == b"""
------BEGIN RSA PRIVATE KEY-----
-MIICXAIBAAKBgQC/ulKFvvVCMzneYlY2dP42R/oYGCpgJL5yPOqJsriixueU3eWC
-qKJYcXf4J4LXZDvKXY//zU9SyJ7fAmI+ioV6IXmyjI7ax5gUFz65V7GfXaxSfMOU
-hKTWHVBdeeGwTK7GKQN4MzzYVOgt8F9Jd88zct0uEFZgGmVvrUXKvh9PsQIDAQAB
-AoGAICIyQohGwtmjEUqZ+HaTRLW7jN4/++0snijnhjyWBXIgziqClOt+iiQ6XzUA
-EOmTu88Cm3TlnpJRTj8wCBtfU1YpOPeC18n6e+IVtt0/X2OK3F4SYu8nYG/bIe2o
-Cs22jgRHeXBJacQoHAqsNJeal+NdTriKdXhiCVcbuCvCUSECQQD2f8YWjqk5DF2W
-tDC7DLnU/gG17GuvOgnAX9BnCtTj8GY2170geT4zs2D/d3yqveLellCFcd7Y+H8X
-BVgbsp/7AkEAxx4dqt1X2pDMBjDT3rCI/Dq3fZftsTEB5JgheMh9TX1m9xO7Q+vT
-/J4kUpnhONtBVnCVD/4YZxm92FMcIeaDQwJAXhobSiM+MPwqgkzZyZ6rFse9aXEP
-Dv7uGBW73oqBCV+N9ePYXJxMhbo2DnDUE+6XvHfP15HIDDaZdfVhVHmVnwJBAIpe
-LTOdWP2zfXQX3kNz3d2ZWAVY3H4zliMqbKgoepqsuC6ecZXDfa6gnpEgCdie1Iqi
-9ZMFeiO7SafYKUaNj00CQEA93rWiE7EbRKydzocnu2O2BbrO9OHOEi+m5eozE/wY
-1C8OB07yAmtfzlsmeVsvjn5JFd4sMe/sq/kbjMK+rzU=
------END RSA PRIVATE KEY-----
 """.strip()
 
     assert rsa.import_key(base64("""
