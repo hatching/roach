@@ -24,8 +24,8 @@ setup(
     install_requires=[
         "click==7.0",
         "cryptography>=2.1",
-        "pefile>=2019.4.18, <2019.5.0"
-        "pycrypto",
+        "pefile>=2019.4.18, <2019.5.0",
+        "pycrypto"
     ],
     extras_require={
         ":sys_platform == 'win32'": [
